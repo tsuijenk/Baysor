@@ -107,7 +107,9 @@ function filter_segmentation_labels!(segmentation_labels::SparseMatrixCSC{<:Inte
 end
 
 function filter_segmentation_labels!(segmentation_labels::MT where MT <: AbstractArray{<:Integer}, segment_per_transcript::Vector{<:Integer}; min_molecules_per_segment::Int)
-    n_mols_per_label = count_array(segment_per_transcript, max_value=maximum(segmentation_labels), drop_zero=true)
+    # Use Base.invokelatest to call maximum and count_array
+    max_label = Base.invokelatest(maximum, segmentation_labels)
+    n_mols_per_label = Base.invokelatest(count_array, segment_per_transcript, max_value=max_label, drop_zero=true)
 
     for labs in (segmentation_labels, segment_per_transcript)
         for i in 1:length(labs)
